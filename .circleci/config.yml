@@ -1,0 +1,48 @@
+version: 2.1
+
+jobs:
+  test_rails:
+    docker:
+      - image: cimg/ruby:3.2.0
+        environment:
+          RAILS_ENV: test
+
+    working_directory: ~/8g_cherry_team_rails_cicd
+
+    steps:
+      - checkout
+
+      # restore gem from cache
+      - restore_cache:
+          keys:
+            - gem-cache-v1-{{ checksum "~/8g_cherry_team_rails_cicd/Gemfile.lock" }}
+            - gem-cache-v1-
+          working_directory: ~/8g_cherry_team_rails_cicd
+
+      # gem install
+      - run:
+          command: |
+            bundle install
+          working_directory: ~/8g_cherry_team_rails_cicd
+
+      - save_cache:
+          key: gem-cache-v1-{{ checksum "~/8g_cherry_team_rails_cicd/Gemfile.lock" }}
+          paths:
+            - ~/8g_cherry_team_rails_cicd/vendor/bundle
+          working_directory: ~/8g_cherry_team_rails_cicd
+
+      - run:
+          command: bundle exec rails db:migrate
+          working_directory: ~/8g_cherry_team_rails_cicd
+
+      # run tests
+      - run:
+          name: test
+          command: |
+            bundle exec rails test
+          working_directory: ~/8g_cherry_team_rails_cicd
+
+workflows:
+  test:
+    jobs:
+      - test_rails
