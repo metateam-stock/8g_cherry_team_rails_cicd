@@ -42,7 +42,44 @@ jobs:
             bundle exec rails test
           working_directory: ~/8g_cherry_team_rails_cicd
 
+  build_and_push:
+    docker:
+      - image: docker:18.06.1-ce-git
+        environment:
+          DOCKER_IMAGE: 8g_cherry_team_rails_cicd
+          APP: 8g_cherry_team_rails_cicd
+          AWS_REGION: us-east-1
+    working_directory: ~/8g_cherry_team_rails_cicd
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 18.06.0-ce
+      - run:
+          name: Install requirements
+          command: |
+            apk add --no-cache py-pip bash
+            pip install awscli
+      - run:
+          name: docker build
+          command: |
+            docker build -t $DOCKER_IMAGE --no-cache .
+      - run:
+          name: push builds
+          shell: /bin/bash
+          command: |
+            set -e
+            eval $(aws --region $AWS_REGION ecr get-login --no-include-email)
+            export AWS_ACCOUNT_ID=$(aws sts get-caller-identity --output text | awk '{print $1}')
+            export SHA1=$(echo ${CIRCLE_SHA1} | cut -c1-7)
+            docker tag $DOCKER_IMAGE:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:$SHA1
+            time docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:$SHA1
+            docker tag $DOCKER_IMAGE:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:latest
+            time docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:latest
+
 workflows:
-  test:
+  test_build:
     jobs:
       - test_rails
+      - build_and_push:
+          requires:
+            - test_rails
