@@ -4,4 +4,6 @@ WORKDIR /app
 COPY Gemfile* ./
 RUN bundle install
 COPY . .
+RUN chmod +x /app/start_app.sh
 EXPOSE 3000
+CMD ["/app/start_app.sh"]
