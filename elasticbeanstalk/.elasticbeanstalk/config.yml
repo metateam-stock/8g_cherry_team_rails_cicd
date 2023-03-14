@@ -1,12 +1,12 @@
 branch-defaults:
   default:
-    environment: Railscicd-env
+    environment: 8gcherryteamrailscicd-env
 environment-defaults:
   Railscicd-env:
     branch: null
     repository: null
 global:
-  application_name: rails-cicd
+  application_name: 8g-cherry-team-rails-cicd
   default_ec2_keyname: null
   default_platform: Docker running on 64bit Amazon Linux 2
   default_region: us-east-1

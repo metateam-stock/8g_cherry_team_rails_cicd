@@ -75,11 +75,30 @@ jobs:
             time docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:$SHA1
             docker tag $DOCKER_IMAGE:latest $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:latest
             time docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$APP:latest
+  deploy:
+    docker:
+      - image: circleci/python:3.7
+    steps:
+      - checkout
+      - run:
+          name: Install requirements
+          command: |
+            sudo pip install awsebcli
+      - run:
+          name: Deploy!
+          shell: /bin/bash
+          command: |
+            cd elasticbeanstalk
+            eb deploy 8gcherryteamrailscicd-env
 
 workflows:
-  test_build:
+  test_build_deploy:
     jobs:
       - test_rails
       - build_and_push:
           requires:
             - test_rails
+      - deploy:
+          requires:
+            - test_rails
+            - build_and_push

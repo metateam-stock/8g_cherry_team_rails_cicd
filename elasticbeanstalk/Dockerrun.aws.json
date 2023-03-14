@@ -1,7 +1,7 @@
 {
 	"AWSEBDockerrunVersion": "1",
 	"Image": {
-		"Name": "ECR Repositories URL/Image tag"
+		"Name": "ECR Repositories URL:Image tag"
 	},
 	"Ports": [
 		{
