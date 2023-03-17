@@ -41,13 +41,12 @@ jobs:
           command: |
             bundle exec rails test
           working_directory: ~/8g_cherry_team_rails_cicd
-
   build_and_push:
     docker:
       - image: docker:18.06.1-ce-git
         environment:
-          DOCKER_IMAGE: 8g_cherry_team_rails_cicd
-          APP: 8g_cherry_team_rails_cicd
+          DOCKER_IMAGE: 8g-cherry-team-rails-cicd
+          APP: 8g-cherry-team-rails-cicd
           AWS_REGION: us-east-1
     working_directory: ~/8g_cherry_team_rails_cicd
     steps:
